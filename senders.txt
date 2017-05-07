@@ -1,0 +1,1 @@
+Here it goes the e-mail adresses that are not new, separated by newlines
