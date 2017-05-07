@@ -10,9 +10,9 @@ This is what it does:
 
 **TODO**
 
-I would want to branch the script into more files.
-Create lookForKeywords function, to get the body of the mails and check for any keyword in them.
-Anything that improves the script
+- I would want to branch the script into more files.
+- Create lookForKeywords function, to get the body of the mails and check for any keyword in them.
+- Anything that improves the script, really.
 
 
 **Any help is appreciated**
