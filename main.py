@@ -3,18 +3,20 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import re, pickle, base64, sys, os
 
-matchMail = re.compile(r'''<(
+matchMail = re.compile(r'''(
     [a-zA-Z0-9._%+-]+               # username
     @                               # arroba
     [a-zA-Z0-9.-]+                  # domain name
     \.[a-zA-Z]{2,4}                 # dot something
-    )>''', re.VERBOSE)
+    )''', re.VERBOSE)
 
 label_body = {"addLabelIds": ['checked'],"ids": [],"removeLabelIds": []}
 
 def lookForKeywords(message, sender):
     keywords_file = open('keywords.txt')
-    message_text = message['payload']['parts'][0]['body']['data']
+    message_deep = message['payload']
+    while 'parts' in message_deep:
+        message_deep = message_deep['parts'][0]
     message_text = base64.urlsafe_b64decode(message_text)
     for keyword in keywords_file.readlines():
         matchKeyword = re.compile(keyword, re.I)
@@ -54,7 +56,8 @@ def getSenders(look_labels = True):
         list_messages = gmail_api.list(userId = 'me', pageToken = page_token).execute()
         list_messages = list_messages['messages']
         read_label_file = open('label.txt','rb')
-        read_label_file_p = pickle.open(read_label_file)
+        read_label_file_p = pickle.load(read_label_file)
+        read_label_file.close()
         mails_tobe_labeled = []
 
         for message in list_messages: # Loop for mails inside the same page
@@ -78,15 +81,17 @@ def getSenders(look_labels = True):
             # This only executes when the message is new or look_labels = False
             headers = get_message['payload']['headers']
             for header in headers:
-                if header['name'] = 'From':
+                if header['name'] == 'From':
                     match = matchMail.search(header['value'])
+                    if not match:
+                        sys.exit(header['value'] + ' doesnt match')
                     sender = match.groups()[0] # String
-                    sender = sender + ' \n'
+                    sendern = sender + ' \n'
 
             senders_r = open('senders.txt')
-            if sender not in senders_r.readlines():
+            if sendern not in senders_r.readlines():
                 senders_a = open('senders.txt', 'a')
-                senders_a.write(sender)
+                senders_a.write(sendern)
                 senders_a.close()
                 new_sender = True
             senders_r.close()
@@ -102,12 +107,15 @@ def getSenders(look_labels = True):
             add_labels = {'ids':[],'addLabelIds':[],'removeLabelIds':[]}
             add_labels['addLabelIds'].append(read_label_file_p['id'])
             add_labels['ids'] = mails_tobe_labeled
-            gmail_api.batchModify(userId = me, body = body_add_labels)
+            gmail_api.batchModify(userId = 'me', body = add_labels).execute()
+
             # This will raise an error if there are more than 1000 messages
             # to be labeled
             break
 
-os.chdir(os.path.realpath(__file__))
+main_path = os.path.realpath(__file__)
+dir_path = os.path.dirname(main_path)
+os.chdir(dir_path)
 
 # Credentials ( Get / Send Mail / Modify draft and labels)
 scopes = ['https://www.googleapis.com/auth/gmail.send',
