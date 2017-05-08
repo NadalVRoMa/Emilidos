@@ -39,15 +39,9 @@ def sendMail(sender):
 
     mail_to_send_body = {'id':mail_to_send['id']}
     mail_sended = gmail.users().drafts().send(userId = 'me', body = mail_to_send_body)
+    # Sends the e-mail
 
-
-
-
-
-
-
-
-def getSenders(creds, look_labels = True):
+def getSenders(look_labels = True):
     # look_labels defines what the function does.
     # If True, then looks if each message has the label 'checked'.
     # If a message is 'checked' then goes to the next message.
@@ -98,8 +92,7 @@ def getSenders(creds, look_labels = True):
             senders_r.close()
 
             if new_sender and look_labels:
-                has_keywords = lookForKeywords(get_message, sender)
-                # AQUÍ LA FUNCIÓN PARA VER SI EL EMAIL CONTIENE KEYWORDS
+                lookForKeywords(get_message, sender)
 
         # Look for next page // Stop looking messages
         if 'nextPageToken' in list_messages:
@@ -148,4 +141,6 @@ if first_time:
     pickle.dump(checked_label, write_label_file)
     write_label_file.close()
     # Gets all the senders to senders.txt
-    getSenders(credentials, look_labels = False)
+    getSenders(look_labels = False)
+
+getSenders()
