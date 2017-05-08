@@ -6,14 +6,7 @@ Emilidos is a script that checks your gmail inbox and sends an e-mail to any e-m
 This is what it does:
 
 - The first time the script is executed, asks for your permission, saves all the e-mail adress already in your inbox to a text file and labels all your mail so it won't have to check it again in the future.
-- The following times, it looks unlabeled mail which it's sender has never contacted you before, then looks if the mail has any instance of any word in your keywords.txt file. If it has, then replies the e-mail with a draft mail. If it doesn't, it continues looking. When it runs out of unlabeled e-mails to check, labels the just checked mails.
-
-**TODO**
-
-- I would want to branch the script into more files.
-- Create sendMail function
-- Anything that improves the script, really.
-
+- The following times, it looks unlabeled mail which it's sender has never contacted you before, then looks if the mail has any instance of any word in your keywords.txt file. If it has, then replies the e-mail with a draft e-mail created before with emilidos@mail.com as destinatary. If it doesn't, it continues looking. When it runs out of unlabeled e-mails to check, labels the just checked mails.
 
 **Any help is appreciated**
 
