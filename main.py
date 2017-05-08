@@ -1,7 +1,7 @@
 from apiclient import discovery
 from httplib2 import Http
 from oauth2client import file, client, tools
-import re, pickle, base64
+import re, pickle, base64, sys, os
 
 matchMail = re.compile(r'''<(
     [a-zA-Z0-9._%+-]+               # username
@@ -23,6 +23,27 @@ def lookForKeywords(message, sender):
             sendMail(sender)
 
 def sendMail(sender):
+    original_draft = gmail.users().drafts().list(userId='me',q='to:emilidos@mail.com').execute()
+    if original_draft['resultSizeEstimate'] == 0:
+        sys.exit('Draft message not found. \n Please create a draft message with destinatary \'emilidos@mail.com\'')
+    if original_draft['resultSizeEstimate'] > 1:
+        sys.exit('Too many draft messages with subject destinatary \'emilidos@mail.com\'. Please delete all but one.')
+
+    mail_to_send_raw = original_draft['message']['raw']
+    mail_to_send_decoded = base64.urlsafe_b64decode(mail_to_send_raw)
+    mail_to_send_decoded = re.sub('emilidos@mail.com', sender, mail_to_send_decoded)
+    mail_to_send_raw = base64.urlsafe_b64encode(mail_to_send_raw)
+    mail_to_send = {"message": {"raw": mail_to_send_raw}}
+    mail_to_send = gmail.users().drafts().create(userId = 'me', body = mail_to_send)
+    # Now mail_to_send stores the id of the draft that is going to be sended.
+
+    mail_to_send_body = {'id':mail_to_send['id']}
+    mail_sended = gmail.users().drafts().send(userId = 'me', body = mail_to_send_body)
+
+
+
+
+
 
 
 
@@ -93,7 +114,9 @@ def getSenders(creds, look_labels = True):
             # to be labeled
             break
 
-# Credentials ( Get / Send Mail )
+os.chdir(os.path.realpath(__file__))
+
+# Credentials ( Get / Send Mail / Modify draft and labels)
 scopes = ['https://www.googleapis.com/auth/gmail.send',
           'https://www.googleapis.com/auth/gmail.readonly',
           'https://www.googleapis.com/auth/gmail.modify']
